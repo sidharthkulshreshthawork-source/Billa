@@ -547,3 +547,53 @@ export const importData = async (jsonString, selection) => {
 
   return result;
 };
+
+// Billa accounting: a separate v2 book. No legacy `saveBill` or JSON
+// endpoint is used by these commands. An HttpOnly owner cookie carries
+// identity, and a per-tab CSRF token authorizes every mutation.
+let accountingCsrf = (() => { try { return sessionStorage.getItem('billa-accounting-csrf') || ''; } catch { return ''; } })();
+async function accountingFetch(route,{method='GET',body}={}){
+  const response=await fetch('/api/v2'+route,{
+    method,credentials:'same-origin',cache:'no-store',
+    headers:{...(body===undefined?{}:{'Content-Type':'application/json'}),
+      ...(accountingCsrf?{'X-Accounting-CSRF':accountingCsrf}:{})},
+    ...(body===undefined?{}:{body:JSON.stringify(body)})
+  });
+  let data=null;
+  try{data=await response.json();}catch{/* report HTTP error below */}
+  if(!response.ok){
+    const error=new Error(data?.error||`Accounting request failed (HTTP ${response.status})`);
+    error.code=data?.code;error.status=response.status;
+    if(response.status===401 && route!=='/auth/login'){
+      accountingCsrf='';try{sessionStorage.removeItem('billa-accounting-csrf');}catch{/* storage unavailable */}
+    }
+    throw error;
+  }
+  return data;
+}
+export const getAccountingStatus=()=>accountingFetch('/auth/status');
+export const getAccountingMe=()=>accountingFetch('/auth/me');
+export const bootstrapAccounting=({businessName,password})=>accountingFetch('/auth/bootstrap',{method:'POST',body:{businessName,password}});
+export async function loginAccounting(password){
+  const result=await accountingFetch('/auth/login',{method:'POST',body:{password}});
+  accountingCsrf=result.csrfToken;
+  try{sessionStorage.setItem('billa-accounting-csrf',accountingCsrf);}catch{/* ephemeral token */}
+  return result;
+}
+export async function logoutAccounting(){
+  try{return await accountingFetch('/auth/logout',{method:'POST',body:{}});}
+  finally{accountingCsrf='';try{sessionStorage.removeItem('billa-accounting-csrf');}catch{/* ephemeral */}}
+}
+export const updateAccountingTax=({sellerState,gstin,registered})=>accountingFetch('/business/tax-config',{method:'PUT',body:{sellerState,gstin,registered}});
+export const listAccountingDrafts=()=>accountingFetch('/invoices/drafts');
+export const listAccountingInvoices=()=>accountingFetch('/invoices');
+export const getAccountingDraft=id=>accountingFetch('/invoices/drafts/'+encodeURIComponent(id));
+export const getAccountingInvoice=id=>accountingFetch('/invoices/'+encodeURIComponent(id));
+export const prepareAccountingInvoice=input=>accountingFetch('/invoices/drafts',{method:'POST',body:input});
+export const reviseAccountingInvoice=(id,revision,input)=>accountingFetch('/invoices/drafts/'+encodeURIComponent(id),{method:'PUT',body:{revision,input}});
+export const approveAccountingInvoice=(id,revision,digest)=>accountingFetch('/invoices/drafts/'+encodeURIComponent(id)+'/approve',{method:'POST',body:{revision,digest}});
+export const postAccountingInvoice=(id,revision,digest,approvalId,operationId)=>accountingFetch('/invoices/drafts/'+encodeURIComponent(id)+'/post',{method:'POST',body:{revision,digest,approvalId,operationId}});
+export const getAccountingTrialBalance=()=>accountingFetch('/accounting/trial-balance');
+export const getAccountingJournal=()=>accountingFetch('/accounting/journal');
+export const getAccountingReceivables=()=>accountingFetch('/accounting/receivables');
+export const getAccountingRevenue=()=>accountingFetch('/accounting/service-revenue');
