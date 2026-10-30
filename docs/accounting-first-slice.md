@@ -1,8 +1,9 @@
-# Billa — Offline Accounting Development Mode
+# Billa — Optional Accounting (Beta) Inside the Original Billing App
 
 > This is an **experimental, service-only, single-owner accounting vertical slice**.
 > It is **not** a production-ready GST filing or full-accounting release.
-> Normal billing stays exactly as it was unless you explicitly enable this mode.
+> The original Dashboard, invoices, customers, products, inventory and reports
+> remain the default. Accounting (Beta) is a separate optional sidebar section.
 
 ## Requirements
 
@@ -22,8 +23,9 @@ npm run server
 ```
 
 Open the local URL printed by the server (normally `http://localhost:47371`).
-The new Billa accounting workspace replaces the legacy billing screens **only
-while `ACCOUNTING_MODE=1`**.
+**Billa opens its original interface first**. Choose **Accounting (Beta)** from
+the original sidebar to open the isolated SQLite workspace. Closing or leaving
+Beta returns to the original Billa application and does not import old invoices.
 
 On macOS/Linux or in a temporary test terminal:
 
@@ -31,9 +33,11 @@ On macOS/Linux or in a temporary test terminal:
 ACCOUNTING_MODE=1 ACCOUNTING_DATA_DIR="$HOME/BillaAccountingData" npm run server
 ```
 
-To use the original GST Billing application again, clear `ACCOUNTING_MODE`
-and restart the server. These modes have **separate financial stores** and
-there is **no automatic import/sync** between them.
+The original GST Billing application works **even while `ACCOUNTING_MODE=1`**.
+Setting `ACCOUNTING_MODE=0` hides the Beta section. Original records remain
+under the legacy app's `data/` directory by default (or `BILLA_LEGACY_DATA_DIR`
+when explicitly configured). Beta accounting records remain in
+`ACCOUNTING_DATA_DIR`. There is **no automatic import, cross-posting or sync**.
 
 ## Supported first workflow
 
@@ -65,8 +69,15 @@ The same transaction across states records ₹1,800 output IGST instead.
 
 - This local mode is owner-only with an HTTP-only session cookie, salted scrypt
   password verification, CSRF protection and same-origin checks.
-- Accounting mode blocks all legacy JSON `/api/*` routes (except health and v2).
-  Old JSON documents and `data/` are **not** silently migrated.
+- Original JSON billing APIs stay available in the main Billa app. Beta
+  uses only authenticated `/api/v2/*` routes and its own SQLite database.
+  Old JSON documents and `data/` are **not** silently migrated or posted.
+- The Beta owner login protects only the Beta ledger. It does **not** protect
+  legacy JSON endpoints; keep Billa bound to localhost and use existing
+  security options for the original billing app.
+- If your original Billa installation was in **another folder**, the updater
+  cannot automatically discover that installation's old data. Use a verified
+  legacy backup/restore process; never copy legacy JSON files into SQLite.
 - SQLite stores amounts in integer paise, uses foreign keys, and posts documents,
   journal entries, approval consumption, idempotency records and audit events in
   one transaction. Finalized journals cannot be edited or deleted.
