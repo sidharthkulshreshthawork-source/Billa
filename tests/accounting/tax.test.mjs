@@ -23,3 +23,29 @@ test('unregistered bill of supply records zero tax',()=>{
  const result=computeServiceInvoicePreview({seller:{is_gst_registered:0,seller_state:'08'},input:data});
  assert.equal(result.errors.length,0);assert.equal(result.preview.totalReceivablePaise,1000000);
 });
+
+
+test('intra-UT invoice uses CGST and UTGST rather than SGST', () => {
+  for (const code of ['04','26','31','35','38']) {
+    const sellerUT={...seller,seller_state:code,gstin:code+'AAAAA0000A1Z5'};
+    const data=input();data.placeOfSupplyState=code;
+    const {preview,errors}=computeServiceInvoicePreview({seller:sellerUT,input:data});
+    assert.deepEqual(errors,[]);
+    assert.equal(preview.cgstPaise,90000);
+    assert.equal(preview.utgstPaise,90000,code);
+    assert.equal(preview.sgstPaise,0);
+    assert.equal(preview.igstPaise,0);
+    assert.equal(preview.totalReceivablePaise,1180000);
+  }
+});
+
+test('legislative territories use SGST for intra-jurisdiction service sales', () => {
+  for (const code of ['01','07','34']) {
+    const localSeller={...seller,seller_state:code,gstin:code+'AAAAA0000A1Z5'};
+    const data=input();data.placeOfSupplyState=code;
+    const {preview,errors}=computeServiceInvoicePreview({seller:localSeller,input:data});
+    assert.deepEqual(errors,[]);
+    assert.equal(preview.sgstPaise,90000,code);
+    assert.equal(preview.utgstPaise,0);
+  }
+});
