@@ -81,6 +81,22 @@
 .billa-modal{background:#fff;width:min(100%,490px);max-height:92vh;overflow:auto;padding:28px;border-radius:18px;box-shadow:0 24px 100px rgba(15,22,40,.2)}
 .billa-modal h2{font-size:22px;margin:0 0 9px}
 .billa-modal>p{color:var(--billa-secondary);line-height:1.6}
+/* Accounting is a nested, optional view; do not take over the legacy app shell. */
+.billa-workspace.billa-embedded,.billa-auth-shell.billa-embedded{min-height:0;background:transparent;width:100%}
+.billa-workspace.billa-embedded .billa-topbar{position:static;padding:12px 14px;border:1px solid var(--billa-line);border-radius:12px;gap:10px;flex-wrap:wrap;box-shadow:none}
+.billa-workspace.billa-embedded .billa-brand{display:none}
+.billa-workspace.billa-embedded .billa-nav{gap:2px}
+.billa-workspace.billa-embedded .billa-nav button{padding:9px 10px}
+.billa-workspace.billa-embedded .billa-content{width:100%;max-width:none;margin:0;padding:20px 0 48px}
+.billa-workspace.billa-embedded .billa-page-heading{margin-bottom:14px}
+.billa-auth-shell.billa-embedded{padding:24px 12px;min-height:420px}
+.billa-auth-shell.billa-embedded .billa-auth-card{width:min(420px,100%)}
+@media print{
+  body:has(.billa-embedded .billa-print-document) .sidebar,
+  body:has(.billa-embedded .billa-print-document) .mobile-topbar,
+  body:has(.billa-embedded .billa-print-document) .sidebar-backdrop{display:none!important}
+  body:has(.billa-embedded .billa-print-document) .main-content{margin:0!important;padding:0!important;max-width:none!important;width:100%!important}
+}
 @media(max-width:980px){.billa-topbar{flex-wrap:wrap;gap:12px}.billa-nav{order:3;flex-basis:100%}.billa-split{grid-template-columns:1fr}.billa-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.billa-content{width:calc(100% - 24px);padding-top:20px}.billa-panel{padding:17px}.billa-page-heading h1{font-size:25px}.billa-page-heading>.billa-pill{display:none}.billa-form-grid,.billa-line-grid{grid-template-columns:1fr}.billa-metric-grid{grid-template-columns:1fr 1fr}.billa-metric strong{font-size:20px}.billa-table{display:block;overflow-x:auto;white-space:nowrap}.billa-btn{font-size:12px;padding:9px 11px}}
 @media print{body{background:#fff!important}.billa-topbar,.billa-page-heading,.billa-alert,.billa-print-actions,.billa-workspace .billa-pill,.billa-content>:not(.billa-print-document){display:none!important}.billa-content{padding:0;width:100%;margin:0}.billa-panel{border:0;box-shadow:none;padding:0}.billa-invoice-preview{border:1px solid #ddd;background:#fff}.billa-print-document{display:block!important}.billa-print-document .billa-statutory-warning{display:block!important;color:#111!important;background:#fff!important;border:2px solid #222!important;font-size:14px!important;font-weight:800!important;text-align:center!important}}
