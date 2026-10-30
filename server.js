@@ -89,6 +89,25 @@ app.use((req, res, next) => {
   return (req.path === IMPORT_ROUTE ? importBody : jsonBody)(req, res, next);
 });
 
+// Billa accounting is an explicit local-only development mode. A legacy JSON invoice
+// must never share authoritative books with SQLite. Do not load node:sqlite in
+// normal mode, which must remain compatible with the original Node versions.
+if (process.env.ACCOUNTING_MODE === '1') {
+  const [{ openAccountingDb }, { registerAccountingAuthRoutes, registerAccountingInvoiceRoutes,
+    createLegacyAccountingFence }] = await Promise.all([
+    import('./server/accounting/sqlite.js'), import('./server/accounting/routes.js'),
+  ]);
+  const accountingDir = process.env.ACCOUNTING_DATA_DIR ||
+    path.join(__dirname, 'accounting-data');
+  const accountingDb = openAccountingDb({ dataDir: accountingDir });
+  registerAccountingAuthRoutes(app, { db: accountingDb });
+  registerAccountingInvoiceRoutes(app, { db: accountingDb });
+  // MUST be mounted before the original /api routes. It blocks even legacy
+  // GET requests so a session cannot accidentally combine two book sources.
+  app.use(createLegacyAccountingFence({ db: accountingDb }));
+  console.log('Billa accounting development mode enabled; legacy financial APIs disabled');
+}
+
 // Ensure data directory and sub-directories exist
 const DIRS = ['bills', 'clients', 'templates', 'products', 'expenses', 'recurring', 'receipts', 'profiles', 'purchases'];
 for (const dir of DIRS) {
