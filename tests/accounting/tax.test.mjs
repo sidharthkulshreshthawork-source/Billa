@@ -49,3 +49,13 @@ test('legislative territories use SGST for intra-jurisdiction service sales', ()
     assert.equal(preview.utgstPaise,0);
   }
 });
+
+
+test('invalid or obsolete GST state codes cannot be accepted', () => {
+  for (const badCode of ['00','25','28','39','99']) {
+    const data=input();data.placeOfSupplyState=badCode;
+    const result=computeServiceInvoicePreview({seller,input:data});
+    assert.equal(result.preview,null,`unassigned state ${badCode}`);
+    assert.ok(result.errors.length>0);
+  }
+});
