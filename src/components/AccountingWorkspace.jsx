@@ -50,6 +50,7 @@ function InvoicePreview({preview}){
     <MoneyLine label="Taxable services" amount={preview.taxablePaise}/>
     {preview.cgstPaise>0&&<MoneyLine label="CGST" amount={preview.cgstPaise}/>}
     {preview.sgstPaise>0&&<MoneyLine label="SGST" amount={preview.sgstPaise}/>}
+    {preview.utgstPaise>0&&<MoneyLine label="UTGST" amount={preview.utgstPaise}/>}
     {preview.igstPaise>0&&<MoneyLine label="IGST" amount={preview.igstPaise}/>}
     <MoneyLine label="Total receivable" amount={preview.totalReceivablePaise} strong/>
   </div>;
