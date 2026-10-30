@@ -57,21 +57,29 @@ export function computeServiceInvoicePreview({seller,input}){
   if(errors.length)return {preview:null,errors};
   try{
     const interstate=String(business.seller_state)!==String(v.placeOfSupplyState);
-    let cgst=0n,sgst=0n,igst=0n;
+    // Intra-territory tax must distinguish UTGST from SGST.
+    // Territories with legislatures (Delhi, Puducherry, J&K) use SGST.
+    const isUtgst=['04','26','31','35','38'].includes(String(business.seller_state));
+    let cgst=0n,sgst=0n,utgst=0n,igst=0n;
     for(const line of lines){
       const tax=BigInt(line.taxPaise);
       if(interstate)igst+=tax;
-      else {const part=halfUp(tax,2n);cgst+=part;sgst+=tax-part;}
+      else {
+        const part=halfUp(tax,2n);
+        cgst+=part;
+        if(isUtgst)utgst+=tax-part;
+        else sgst+=tax-part;
+      }
     }
     const taxable=lines.reduce((n,line)=>n+BigInt(line.taxablePaise),0n);
-    const totalTax=cgst+sgst+igst,total=taxable+totalTax;
+    const totalTax=cgst+sgst+utgst+igst,total=taxable+totalTax;
     if(total<=0n)throw Error('Invoice cannot be zero');
     return {preview:{
       invoiceDate:v.invoiceDate,documentType:v.documentType,currency:'INR',customerId:customer.id.trim(),
       customerName:customer.name.trim(),placeOfSupplyState:v.placeOfSupplyState,
       sellerState:business.seller_state,sellerGstin:business.gstin||null,lines,
       taxablePaise:safe(taxable),cgstPaise:safe(cgst),sgstPaise:safe(sgst),igstPaise:safe(igst),
-      utgstPaise:0,cessPaise:0,totalTaxPaise:safe(totalTax),totalReceivablePaise:safe(total)
+      utgstPaise:safe(utgst),cessPaise:0,totalTaxPaise:safe(totalTax),totalReceivablePaise:safe(total)
     },errors:[]};
   }catch(e){return {preview:null,errors:[`Ledger limit: ${e.message}`]};}
 }
