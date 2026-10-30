@@ -227,7 +227,7 @@ export default function AccountingWorkspace(){
       <div className="billa-brand"><span className="billa-logo">B</span><div><strong>Billa</strong><small>{business?.name||'Accounting'}</small></div></div>
       <nav className="billa-nav" aria-label="Accounting pages">
         {[['create','New invoice'],['drafts','Drafts'],['invoices','Posted invoices'],['ledger','Accounts'],['settings','GST settings']].map(([id,label])=>
-          <button key={id} type="button" className={tab===id?'active':''} onClick={()=>{setTab(id);setError('');setConfirmPost(false);}}>{label}</button>)}
+          <button key={id} type="button" className={tab===id?'active':''} onClick={()=>{setTab(id);if(id==='invoices')setSelectedInvoice(null);setError('');setConfirmPost(false);}}>{label}</button>)}
       </nav>
       <button className="billa-btn subtle" onClick={handleLogout} disabled={busy}>Log out</button>
     </header>
