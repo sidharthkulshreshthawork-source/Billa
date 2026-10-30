@@ -96,7 +96,10 @@
     "test:update-unix": "node scripts/test-update-unix.mjs",
     "release:check": "node scripts/release-check.mjs",
     "docs:zip": "node scripts/build-docs-zip.mjs",
-    "verify:release": "node scripts/verify-release.mjs"
+    "verify:release": "node scripts/verify-release.mjs",
+    "test:accounting": "node --test tests/accounting/*.test.mjs",
+    "test:accounting:e2e": "node --test tests/accounting/invoice-flow.e2e.mjs",
+    "test:accounting:ui": "node --test tests/accounting/ui.e2e.mjs"
   },
   "dependencies": {
     "cors": "^2.8.6",
