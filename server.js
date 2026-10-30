@@ -15,7 +15,12 @@ import { fileURLToPath } from 'url';
 import { templateTotals, clientYearToDate, nextCounterValue, startFor, numberSeriesFor, counterKeyFor, formatDocNumber, businessKeyOf, getFinancialYearLabel, INVOICE_TYPES } from './src/utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, 'data');
+// Preserve legacy JSON bills in their own directory; this never points at SQLite.
+// Tests/installers may explicitly configure a stable path, but the original
+// installed Billa keeps its historical ./data layout by default.
+const DATA_DIR = process.env.BILLA_LEGACY_DATA_DIR
+  ? path.resolve(process.env.BILLA_LEGACY_DATA_DIR)
+  : path.join(__dirname, 'data');
 
 // Port choice — we deliberately default to a high, unusual number rather than
 // the conventional 3001. The 3000-range is heavily used by every other Node /
@@ -89,23 +94,25 @@ app.use((req, res, next) => {
   return (req.path === IMPORT_ROUTE ? importBody : jsonBody)(req, res, next);
 });
 
-// Billa accounting is an explicit local-only development mode. A legacy JSON invoice
-// must never share authoritative books with SQLite. Do not load node:sqlite in
-// normal mode, which must remain compatible with the original Node versions.
+// Accounting (Beta) is additive and opt-in: the original Billa endpoints
+// always remain available. Beta uses distinct /api/v2 routes and its own
+// SQLite store. No legacy JSON records are imported or posted automatically.
+// Keep ACCOUNTING_MODE=1 compatible with already-installed Windows launchers.
 if (process.env.ACCOUNTING_MODE === '1') {
-  const [{ openAccountingDb }, { registerAccountingAuthRoutes, registerAccountingInvoiceRoutes,
-    createLegacyAccountingFence }] = await Promise.all([
-    import('./server/accounting/sqlite.js'), import('./server/accounting/routes.js'),
-  ]);
+  const [{ openAccountingDb }, { registerAccountingAuthRoutes, registerAccountingInvoiceRoutes }] =
+    await Promise.all([
+      import('./server/accounting/sqlite.js'),
+      import('./server/accounting/routes.js'),
+    ]);
   const accountingDir = process.env.ACCOUNTING_DATA_DIR ||
     path.join(__dirname, 'accounting-data');
+  if (path.resolve(accountingDir) === path.resolve(DATA_DIR)) {
+    throw new Error('Accounting and legacy data directories must be separate');
+  }
   const accountingDb = openAccountingDb({ dataDir: accountingDir });
   registerAccountingAuthRoutes(app, { db: accountingDb });
   registerAccountingInvoiceRoutes(app, { db: accountingDb });
-  // MUST be mounted before the original /api routes. It blocks even legacy
-  // GET requests so a session cannot accidentally combine two book sources.
-  app.use(createLegacyAccountingFence({ db: accountingDb }));
-  console.log('Billa accounting development mode enabled; legacy financial APIs disabled');
+  console.log('Billa Accounting (Beta) available separately; original JSON billing remains enabled');
 }
 
 // Ensure data directory and sub-directories exist
