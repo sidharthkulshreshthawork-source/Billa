@@ -131,27 +131,15 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// v1.10.77 (#84) - settings the browser has lost come back from the data
-// folder before the first render (the wizard and Region read them on start).
-// The accounting workspace is selected before legacy preferences, app PIN,
-// old JSON APIs or auto-save effects can run. This prevents two sources of
-// financial truth while allowing the original application to run unchanged
-// when ACCOUNTING_MODE is not enabled on the server.
+// The original Billa interface ALWAYS boots first, including when the opt-in
+// accounting backend is enabled. Accounting (Beta) appears as a lazy sidebar
+// section inside App; it never replaces legacy invoices, customers or products.
 async function mountBilla() {
-  let accountingEnabled = false
-  try {
-    const response = await fetch('/api/v2/auth/status', { cache: 'no-store' })
-    if (response.ok) accountingEnabled = (await response.json()).accountingMode === true
-  } catch { /* Original app server is down or accounting disabled */ }
-  const root = createRoot(document.getElementById('root'))
-  if (accountingEnabled) {
-    const { default: AccountingWorkspace } = await import('./components/AccountingWorkspace.jsx')
-    root.render(<StrictMode><AccountingWorkspace /></StrictMode>)
-    return
-  }
   const restored = await restorePrefs().catch(() => false)
   startMirroring(restored)
-  root.render(<StrictMode><AppLockGate><App /></AppLockGate></StrictMode>)
+  createRoot(document.getElementById('root')).render(
+    <StrictMode><AppLockGate><App /></AppLockGate></StrictMode>
+  )
 }
 mountBilla().catch(error => {
   console.error('Unable to start Billa', error)
