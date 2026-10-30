@@ -1,0 +1,55 @@
+name: Billa Windows accounting launch verification
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/accounting-service-invoice-ledger
+    paths:
+      - .github/workflows/windows-accounting-launch.yml
+permissions:
+  contents: read
+jobs:
+  windows-accounting-launch:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build React app
+        run: npm run build
+      - name: Boot Windows Express + SQLite accounting mode
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:ACCOUNTING_MODE = '1'
+          $env:ACCOUNTING_DATA_DIR = Join-Path $env:RUNNER_TEMP 'BillaAccountingData'
+          New-Item -ItemType Directory -Path $env:ACCOUNTING_DATA_DIR -Force | Out-Null
+          $stdout = Join-Path $env:RUNNER_TEMP 'billa-stdout.txt'
+          $stderr = Join-Path $env:RUNNER_TEMP 'billa-stderr.txt'
+          $server = Start-Process -FilePath 'node.exe' -ArgumentList 'server.js' -WorkingDirectory $PWD.Path -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          try {
+            $ready = $false
+            for ($i=0; $i -lt 40; $i++) {
+              if ($server.HasExited) {
+                throw "Billa exited unexpectedly: $(Get-Content $stderr -Raw)"
+              }
+              try {
+                $status = Invoke-RestMethod -Uri 'http://127.0.0.1:47371/api/v2/auth/status' -TimeoutSec 2
+                if ($status.accountingMode -eq $true -and $status.initialized -eq $false) {
+                  $ready = $true
+                  break
+                }
+              } catch {
+                Start-Sleep -Milliseconds 500
+              }
+            }
+            if (-not $ready) { throw "Billa did not respond in accounting mode. $(Get-Content $stderr -Raw)" }
+            Write-Host 'Windows accounting startup verified on 127.0.0.1:47371'
+          } finally {
+            Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+          }
