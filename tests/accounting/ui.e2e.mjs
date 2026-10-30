@@ -62,6 +62,7 @@ test('browser signup, GST setup, draft, deliberate posting, printed invoice and 
     await page.getByRole('button',{name:'Posted invoices'}).click();
     await page.getByRole('button',{name:'View / print'}).click();
     await page.getByRole('button',{name:'Print invoice'}).waitFor();
+    await page.getByText('ACCOUNTING RECORD — NOT A STATUTORY GST TAX INVOICE').waitFor();
     await page.reload();
     await page.getByRole('heading',{name:'Create service invoice'}).waitFor();
     await page.getByRole('button',{name:'Log out'}).click();
