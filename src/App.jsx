@@ -34,6 +34,8 @@ const IncomeTax = lazy(() => import('./components/IncomeTax'));
 const PurchaseBills = lazy(() => import('./components/PurchaseBills'));
 const ControlPanel = lazy(() => import('./components/ControlPanel'));
 const SupportView = lazy(() => import('./components/SupportView'));
+// Experimental standalone ledger, only fetched after the owner chooses its sidebar entry.
+const AccountingWorkspace = lazy(() => import('./components/AccountingWorkspace.jsx'));
 import StarBanner from './components/StarBanner';
 import AppFooter from './components/AppFooter';
 import LockButton from './components/LockButton';
@@ -82,7 +84,8 @@ function App() {
     } catch { /* sandboxed history API — fall through */ }
     // 'guide' was the built-in User Guide (removed in v1.10.75).
     const last = sessionStorage.getItem('gst_currentView');
-    return last && last !== 'guide' ? last : 'dashboard';
+    // Never auto-open Beta: returning to the app starts in the full billing UI.
+    return last && last !== 'guide' && last !== 'accounting' ? last : 'dashboard';
   });
   const [profile, setProfile] = useState(null);
   const [editingBill, setEditingBill] = useState(() => {
@@ -101,6 +104,16 @@ function App() {
   const retryTimer = useRef(null);
 
   const [serverStatus, setServerStatus] = useState('checking'); // 'checking' | 'online' | 'offline'
+  const [accountingAvailable, setAccountingAvailable] = useState(false);
+  useEffect(() => {
+    let active = true;
+    // Optional feature detection; missing/disabled Beta never blocks legacy billing.
+    fetch('/api/v2/auth/status', { cache: 'no-store' })
+      .then(async response => response.ok ? response.json() : null)
+      .then(status => { if (active) setAccountingAvailable(status?.accountingMode === true); })
+      .catch(() => { if (active) setAccountingAvailable(false); });
+    return () => { active = false; };
+  }, []);
   const profileLoaded = useRef(false);
   const [allProfiles, setAllProfiles] = useState([]);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -536,6 +549,8 @@ function App() {
     { id: 'receipts', icon: Receipt, label: 'Receipts', module: 'receipts' },
     { id: 'reports', icon: BarChart3, label: 'Reports', module: 'reports' },
     { id: 'filing', icon: BookOpen, label: 'GST Returns', module: 'gstReturns' },
+    // Separate, opt-in SQLite books. Never auto-import legacy JSON invoices.
+    ...(accountingAvailable ? [{ id: 'accounting', icon: BookOpen, label: 'Accounting (Beta)', module: 'dashboard' }] : []),
     { id: 'incometax', icon: Calculator, label: 'Income Tax', module: 'incomeTax' },
     // v1.10.75 - opens the online documentation, which covers every screen
     // and stays current; the old built-in guide had fallen far behind.
@@ -991,7 +1006,7 @@ function App() {
         </div>
       )}
       <div className="main-content">
-        {currentView !== 'new' && <StarBanner />}
+        {currentView !== 'new' && currentView !== 'accounting' && <StarBanner />}
         {currentView === 'dashboard' && (
           <Dashboard onNew={handleNewInvoice} onEdit={handleEditInvoice} onPrint={handlePrintInvoice} onDuplicate={handleDuplicateInvoice} onConvert={handleConvertToInvoice} onOpenProducts={() => setCurrentView('inventory')} onOpenSettings={() => setCurrentView('settings')} onOpenGuide={openDocs} onOpenSupport={() => setCurrentView('support')} activeProfile={profile} />
         )}
@@ -1045,6 +1060,9 @@ function App() {
         )}
         {currentView === 'support' && (
           <SupportView />
+        )}
+        {currentView === 'accounting' && accountingAvailable && (
+          <AccountingWorkspace embedded />
         )}
         </Suspense>
         {/* Version + DiceCodes line: Dashboard only, so it never takes space on working screens. */}
