@@ -5,6 +5,7 @@ import {
   prepareServiceInvoice,reviseServiceInvoice,getServiceInvoiceDraft,listServiceInvoiceDrafts,approveDraft,postApprovedInvoice
 } from './invoices.js';
 import {getTrialBalance,getJournal,getServiceRevenueSummary,getOpenReceivables} from './reports.js';
+import {isValidIndianStateCode} from './tax.js';
 
 function error(res,e){
   if(!e.status)console.error('[Billa accounting]',e);
@@ -76,7 +77,7 @@ export function registerAccountingInvoiceRoutes(app,{db,now=Date.now}){
   ).get(actor.businessId)));
   app.put('/api/v2/business/tax-config',owner(({actor,req})=>{
     const {sellerState,gstin,registered}=req.body||{};
-    if(typeof sellerState!=='string'||!/^\d{2}$/.test(sellerState)){
+    if(!isValidIndianStateCode(sellerState)){
       const e=new Error('Enter two-digit seller state code, e.g. 08 for Rajasthan');e.status=422;e.code='INVALID_SELLER_STATE';throw e;
     }
     const isRegistered=registered===true;
