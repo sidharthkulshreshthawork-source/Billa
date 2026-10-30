@@ -1,0 +1,37 @@
+name: Billa accounting integration checks
+on:
+  push:
+    branches: ['feat/accounting-service-invoice-ledger']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  accounting-and-legacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci
+      - name: SQLite accounting unit tests
+        run: npm run test:accounting
+      - name: Real Express API and restart acceptance
+        run: npm run test:accounting:e2e
+      - name: Original GST tax and CSV unit suites
+        run: npm run test:unit
+      - name: Verify Vite production build
+        run: npm run build
+      - name: Install Firefox and Chromium for UI regression
+        run: npx playwright install --with-deps firefox chromium
+      - name: Billa signup to posted-invoice browser acceptance
+        run: npm run test:accounting:ui
+      - name: Original app smoke tests (normal mode)
+        run: node tests/smoke.mjs
+      - name: Lint diagnostics (legacy baseline has known warnings)
+        run: npm run lint
+        continue-on-error: true
