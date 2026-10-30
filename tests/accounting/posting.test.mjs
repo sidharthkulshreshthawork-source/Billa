@@ -58,3 +58,23 @@ test('draft revision or business tax changes invalidate old approvals',t=>{
  assert.throws(()=>postApprovedInvoice({db,actor,draftId:d.draftId,revision:2,digest:revised.digest,approvalId:approval.approvalId,operationId:'change-post',now:now+2}),/changed|preview/i);
  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM posted_invoices').get().n,0);
 });
+
+
+test('same-territory GST sale posts CGST and UTGST to correct liability accounts',t=>{
+ const {db,actor}=dbFor(t);
+ db.prepare("UPDATE businesses SET seller_state='04',gstin='04AAAAA0000A1Z5' WHERE id=?").run(actor.businessId);
+ const input=sample();input.placeOfSupplyState='04';
+ const draft=prepareServiceInvoice({db,actor,input});
+ assert.deepEqual(draft.errors,[]);
+ assert.equal(draft.preview.utgstPaise,90000);
+ assert.equal(draft.preview.sgstPaise,0);
+ const approval=approveDraft({db,actor,draftId:draft.draftId,revision:1,digest:draft.digest,now});
+ const posted=postApprovedInvoice({db,actor,draftId:draft.draftId,revision:1,digest:draft.digest,
+   approvalId:approval.approvalId,operationId:'utgst-001',now:now+1});
+ assert.equal(posted.totalPaise,1180000);
+ const lines=db.prepare(`SELECT a.account_code AS code,l.debit_paise AS debit,l.credit_paise AS credit
+   FROM journal_lines l JOIN accounts a ON a.id=l.account_id WHERE l.entry_id=? ORDER BY a.account_code`)
+   .all(posted.journalId);
+ assert.deepEqual(lines.map(l=>[l.code,l.debit,l.credit]),
+   [['1100',1180000,0],['2100',0,90000],['2130',0,90000],['4000',0,1000000]]);
+});
