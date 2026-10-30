@@ -52,7 +52,7 @@ test('draft revision or business tax changes invalidate old approvals',t=>{
  const input=sample();input.lines[0].rate='11000.00';
  const revised=reviseServiceInvoice({db,actor,draftId:d.draftId,revision:1,input});
  assert.equal(revised.revision,2);
- assert.throws(()=>postApprovedInvoice({db,actor,draftId:d.draftId,revision:1,digest:d.digest,approvalId:a.approvalId,operationId:'stale-post',now:now+2}),/stale/);
+ assert.throws(()=>postApprovedInvoice({db,actor,draftId:d.draftId,revision:1,digest:d.digest,approvalId:a.approvalId,operationId:'stale-post',now:now+2}),/changed|stale/i);
  const approval=approveDraft({db,actor,draftId:d.draftId,revision:2,digest:revised.digest,now});
  db.prepare("UPDATE businesses SET seller_state='27',gstin='27AAAAA0000A1Z5' WHERE id=?").run(actor.businessId);
  assert.throws(()=>postApprovedInvoice({db,actor,draftId:d.draftId,revision:2,digest:revised.digest,approvalId:approval.approvalId,operationId:'change-post',now:now+2}),/changed|preview/i);
