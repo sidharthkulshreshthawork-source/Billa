@@ -73,7 +73,7 @@ function PostedInvoice({invoice,onBack}){
   </div>;
 }
 
-export default function AccountingWorkspace(){
+export default function AccountingWorkspace({embedded=false}){
   const [stage,setStage]=useState('loading');
   const [businessName,setBusinessName]=useState('');
   const [password,setPassword]=useState('');
@@ -207,9 +207,9 @@ export default function AccountingWorkspace(){
     }catch(e){onError(e);}finally{setBusy(false);}
   }
   function newInvoice(){setForm(blankInvoice());setDraft(null);setDirty(true);setError('');setNotice('');setTab('create');setSelectedInvoice(null);}
-  if(stage==='loading')return <main className="billa-auth-shell"><div className="billa-panel">Opening your local accounting workspace…</div></main>;
-  if(stage==='failure')return <main className="billa-auth-shell"><div className="billa-panel"><h1>Accounting mode unavailable</h1><p>{error}</p><p>Requires Node.js 22.16 or newer and a writable accounting data directory.</p></div></main>;
-  if(stage==='setup'||stage==='login')return <main className="billa-auth-shell">
+  if(stage==='loading')return <main className={`billa-auth-shell${embedded?' billa-embedded':''}`}><div className="billa-panel">Opening your local accounting workspace…</div></main>;
+  if(stage==='failure')return <main className={`billa-auth-shell${embedded?' billa-embedded':''}`}><div className="billa-panel"><h1>Accounting mode unavailable</h1><p>{error}</p><p>Requires Node.js 22.16 or newer and a writable accounting data directory.</p></div></main>;
+  if(stage==='setup'||stage==='login')return <main className={`billa-auth-shell${embedded?' billa-embedded':''}`}>
     <div className="billa-auth-brand"><div className="billa-logo">B</div><h1>Billa</h1><p>Simple invoices. Proper books.</p></div>
     <form className="billa-panel billa-auth-card" onSubmit={handleAuth}>
       <p className="billa-eyebrow">OFFLINE · PRIVATE · ONE BUSINESS</p>
@@ -224,7 +224,7 @@ export default function AccountingWorkspace(){
     </form>
   </main>;
 
-  return <div className="billa-workspace">
+  return <div className={`billa-workspace${embedded?' billa-embedded':''}`}>
     <header className="billa-topbar">
       <div className="billa-brand"><span className="billa-logo">B</span><div><strong>Billa</strong><small>{business?.name||'Accounting'}</small></div></div>
       <nav className="billa-nav" aria-label="Accounting pages">
@@ -240,6 +240,7 @@ export default function AccountingWorkspace(){
       </div><span className="billa-pill">Offline-first · INR</span></div>
       {error&&<div className="billa-alert error" role="alert">{error}</div>}
       {notice&&<div className="billa-alert success" role="status">{notice}</div>}
+      {embedded&&<div className="billa-alert info" role="note"><b>Separate Beta books:</b> Existing Billa invoices, customers and products stay in the original billing application. No records are imported or posted to this ledger automatically. Use the left menu to return to your normal Billa workspace.</div>}
       <div className="billa-alert info"><b>First feature only:</b> service credit invoices and read-only receivables are supported.
         Stock billing, receipts, full P&amp;L, GST filing, cloud sync and MCP are not enabled in this workspace.</div>
 
