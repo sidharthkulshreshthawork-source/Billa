@@ -43,3 +43,9 @@ public/tesseract/
 
 # Built documentation site (regenerate with: node docs-site/build.mjs)
 docs-site/out/
+
+# Billa experimental local accounting database (never commit customer data)
+/accounting-data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
