@@ -60,7 +60,8 @@ function PostedInvoice({invoice,onBack}){
   if(!p)return null;
   return <div className="billa-print-document billa-panel">
     <div className="billa-print-actions"><button className="billa-btn subtle" onClick={onBack}>Back to invoices</button><button className="billa-btn primary" onClick={()=>window.print()}>Print invoice</button></div>
-    <div className="billa-invoice-head"><h2>INVOICE</h2><span className="billa-pill">Posted · Immutable</span></div>
+    <div className="billa-invoice-head"><h2>SERVICE INVOICE · ACCOUNTING COPY</h2><span className="billa-pill">Posted · Immutable</span></div>
+    <p className="billa-alert info billa-statutory-warning">ACCOUNTING RECORD — NOT A STATUTORY GST TAX INVOICE</p>
     <p className="billa-muted">{invoice.invoice_number} · {invoice.invoice_date}</p>
     {p.sellerGstin&&<p>Seller GSTIN: <b>{p.sellerGstin}</b></p>}
     <p>Bill to: <b>{invoice.customer_name}</b></p>
