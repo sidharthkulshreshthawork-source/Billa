@@ -7,7 +7,7 @@ import {join} from 'node:path';
 import {chromium} from 'playwright';
 
 function startServer(dir){
-  const child=spawn(process.execPath,['server.js'],{cwd:process.cwd(),env:{...process.env,ACCOUNTING_MODE:'1',ACCOUNTING_DATA_DIR:dir},stdio:['ignore','pipe','pipe']});
+  const child=spawn(process.execPath,['server.js'],{cwd:process.cwd(),env:{...process.env,ACCOUNTING_MODE:'1',ACCOUNTING_DATA_DIR:dir,BILLA_LEGACY_DATA_DIR:join(dir,'legacy-data')},stdio:['ignore','pipe','pipe']});
   const url=new Promise((resolve,reject)=>{
     let buffer='';const timer=setTimeout(()=>reject(Error('Billa accounting app failed to start')),25000);
     child.stdout.on('data',chunk=>{buffer+=String(chunk);const m=buffer.match(/http:\/\/localhost:\d+/);
@@ -30,6 +30,24 @@ test('browser signup, GST setup, draft, deliberate posting, printed invoice and 
     const context=await browser.newContext();
     const page=await context.newPage();
     await page.goto(url,{waitUntil:'domcontentloaded'});
+    // Default startup MUST be the original Billa (not the Beta login).
+    const originalNav=page.locator('.sidebar-nav');
+    await originalNav.getByRole('button',{name:'Dashboard',exact:true}).waitFor();
+    assert.equal(await originalNav.getByRole('button',{name:'Products',exact:true}).count(),1);
+    assert.equal(await originalNav.getByRole('button',{name:'Clients',exact:true}).count(),1);
+    assert.equal(await originalNav.getByRole('button',{name:'Purchases',exact:true}).count(),1);
+    // Clear the original app's welcome wizard if a fresh test profile shows it.
+    for(let i=0;i<5;i++){
+      const skip=page.getByRole('button',{name:/^skip setup$/i}).first();
+      if(await skip.isVisible().catch(()=>false)){await skip.click();continue;}
+      const other=page.getByRole('button',{name:/none of these|continue|finish|close/i}).first();
+      if(await other.isVisible().catch(()=>false)){await other.click();continue;}
+      break;
+    }
+    const betaEntry=originalNav.getByRole('button',{name:'Accounting (Beta)'});
+    await betaEntry.waitFor({state:'visible'});
+    assert.equal(await page.getByRole('heading',{name:'Create your business'}).count(),0);
+    await betaEntry.click();
     await page.getByRole('heading',{name:'Create your business'}).waitFor();
     await page.getByLabel('Business name').fill('Billa Test Services');
     await page.getByLabel('Owner password (12+ characters)').fill('strong offline password 123');
@@ -42,7 +60,7 @@ test('browser signup, GST setup, draft, deliberate posting, printed invoice and 
     await page.getByLabel('GSTIN').fill('08AAAAA0000A1Z5');
     await page.getByRole('button',{name:'Save GST settings'}).click();
     await page.getByText('Business tax settings saved.').first().waitFor();
-    await page.getByRole('button',{name:'New invoice'}).click();
+    await page.locator('.billa-nav').getByRole('button',{name:'New invoice'}).click();
     await page.getByLabel('Customer name').fill('Ramesh');
     await page.getByLabel('Place of supply').selectOption('08');
     await page.getByLabel('Service description').fill('Maintenance');
@@ -66,9 +84,19 @@ test('browser signup, GST setup, draft, deliberate posting, printed invoice and 
     await page.emulateMedia({media:'print'});
     assert.equal(await page.getByText('ACCOUNTING RECORD — NOT A STATUTORY GST TAX INVOICE').isVisible(),true,'warning must appear on printed copy');
     await page.emulateMedia({media:'screen'});
-    await page.reload();
+    // Going back to the original app must restore its products/invoices UI.
+    await originalNav.getByRole('button',{name:'Products',exact:true}).click();
+    assert.match(await originalNav.getByRole('button',{name:'Products',exact:true}).getAttribute('class'),/nav-btn-active/);
+    assert.equal((await page.evaluate(async()=>fetch('/api/bills').then(r=>r.status))),200);
+    await originalNav.getByRole('button',{name:'Accounting (Beta)'}).click();
     await page.getByRole('heading',{name:'Create service invoice'}).waitFor();
-    await page.getByRole('button',{name:'Log out'}).click();
+    // Reloading always starts on original Billa, even if Beta was last viewed.
+    await page.reload();
+    await page.locator('.sidebar-nav').getByRole('button',{name:'Dashboard',exact:true}).waitFor();
+    assert.equal(await page.locator('.billa-workspace').count(),0);
+    await page.locator('.sidebar-nav').getByRole('button',{name:'Accounting (Beta)'}).click();
+    await page.getByRole('heading',{name:'Create service invoice'}).waitFor();
+    await page.locator('.billa-workspace').getByRole('button',{name:'Log out'}).click();
     await page.getByRole('heading',{name:'Unlock your accounting'}).waitFor();
     await context.close();
   }finally{if(browser)await browser.close();await terminate(server.child);rmSync(dir,{recursive:true,force:true});}
