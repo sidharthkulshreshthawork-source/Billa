@@ -1,5 +1,15 @@
 import { toPaise } from './money.js';
 
+// Current GST registration state/territory codes supported by this
+// intentionally India-only first slice. Historical codes 25 and 28 are
+// not valid for new invoices.
+const GST_JURISDICTIONS=new Set([
+  ...Array.from({length:24},(_,i)=>String(i+1).padStart(2,'0')),
+  '26','27',...Array.from({length:10},(_,i)=>String(i+29))
+]);
+export const isValidIndianStateCode=code=>typeof code==='string'&&GST_JURISDICTIONS.has(code);
+
+
 const halfUp = (num,den) => (num+den/2n)/den;
 function milliQty(value){
   if(typeof value!=='string' && typeof value!=='number')throw Error('Quantity is required');
@@ -28,8 +38,8 @@ export function computeServiceInvoicePreview({seller,input}){
   if(v.currency && v.currency!=='INR')errors.push('Only INR is supported in accounting mode');
   if(v.taxInclusive||v.reverseCharge||v.sez||v.export||v.discount||v.cess)errors.push('This special GST/discount/stock case is not yet supported by the ledger');
   if(typeof customer.id!=='string'||!customer.id.trim()||typeof customer.name!=='string'||!customer.name.trim())errors.push('Customer ID and name required');
-  if(!/^[0-9]{2}$/.test(String(business.seller_state||'')))errors.push('Valid two-digit seller state required');
-  if(!/^[0-9]{2}$/.test(String(v.placeOfSupplyState||'')))errors.push('Valid two-digit place of supply required');
+  if(!isValidIndianStateCode(business.seller_state))errors.push('Valid two-digit seller state required');
+  if(!isValidIndianStateCode(v.placeOfSupplyState))errors.push('Valid two-digit place of supply required');
   const registered=business.is_gst_registered===1||business.is_gst_registered===true;
   if(v.documentType==='tax-invoice'){
     if(!registered)errors.push('GST tax invoice requires registered business');
