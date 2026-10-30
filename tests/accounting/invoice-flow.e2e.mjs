@@ -21,7 +21,7 @@ const sample=()=>({
 });
 const scratch=mkdtempSync(join(tmpdir(),'billa-e2e-'));
 const start=()=>spawn(process.execPath,['server.js'],{
-  cwd:process.cwd(),env:{...process.env,ACCOUNTING_MODE:'1',ACCOUNTING_DATA_DIR:scratch},
+  cwd:process.cwd(),env:{...process.env,ACCOUNTING_MODE:'1',ACCOUNTING_DATA_DIR:scratch,BILLA_LEGACY_DATA_DIR:join(scratch,'legacy-data')},
   stdio:['ignore','pipe','pipe']
 });
 async function stop(child){
@@ -29,7 +29,7 @@ async function stop(child){
   await new Promise(resolve=>{child.once('exit',resolve);child.kill('SIGTERM');setTimeout(()=>{child.kill('SIGKILL');resolve();},2500).unref();});
 }
 
-test('real Express service invoice: owner, draft, exact confirmation, balanced ledger, restart and legacy guard',async()=>{
+test('real Express service invoice: owner, draft, exact confirmation, balanced ledger, restart and isolated legacy billing',async()=>{
   let server=start();
   try{
     let base=await urlFor(server);
@@ -58,10 +58,22 @@ test('real Express service invoice: owner, draft, exact confirmation, balanced l
     const badCsrf=csrf;csrf='';
     assert.equal((await request('/api/v2/invoices/drafts',{method:'POST',body:sample()})).status,403);
     csrf=badCsrf;
-    const legacy=await request('/api/bills',{method:'POST',body:{id:'should-never-write'}});
-    assert.equal(legacy.status,409);assert.equal(legacy.body.code,'ACCOUNTING_MIGRATION_REQUIRED');
+    // Existing JSON billing must stay available, but it must NEVER create
+    // an accounting entry or be silently imported into the new ledger.
+    const legacy=await request('/api/bills',{method:'POST',body:{
+      id:'legacy-only-001',invoiceNumber:'legacy-only-001',invoiceType:'tax-invoice',
+      clientName:'Existing Customer',invoiceDate:'2026-10-30',totalAmount:7000
+    }});
+    assert.equal(legacy.status,200);
+    assert.equal(legacy.body.success,true);
     const legacyGet=await request('/api/bills');
-    assert.equal(legacyGet.status,409);
+    assert.equal(legacyGet.status,200);
+    assert.equal(legacyGet.body.length,1);
+    assert.equal(legacyGet.body[0].clientName,'Existing Customer');
+    const beforeBeta=await request('/api/v2/accounting/trial-balance');
+    assert.equal(beforeBeta.status,200);
+    assert.equal(beforeBeta.body.totalDebitPaise,0);
+    assert.equal((await request('/api/v2/invoices')).body.invoices.length,0);
 
     const config=await request('/api/v2/business/tax-config',{method:'PUT',body:{sellerState:'08',gstin:'08AAAAA0000A1Z5',registered:true}});
     assert.equal(config.status,200);
@@ -96,6 +108,10 @@ test('real Express service invoice: owner, draft, exact confirmation, balanced l
     assert.equal(ar.body.invoices.length,1);
     const listed=await request('/api/v2/invoices');
     assert.equal(listed.body.invoices.length,1);
+    assert.equal(listed.body.invoices[0].customerName,'Ramesh');
+    const legacyStillUnchanged=await request('/api/bills');
+    assert.equal(legacyStillUnchanged.status,200);
+    assert.deepEqual(legacyStillUnchanged.body.map(item=>item.id),['legacy-only-001']);
 
     // An approval tied to an old revision can never post after draft edits.
     const other=await request('/api/v2/invoices/drafts',{method:'POST',body:sample()});
@@ -111,6 +127,7 @@ test('real Express service invoice: owner, draft, exact confirmation, balanced l
     assert.equal(after.body.totalDebitPaise,1180000);
     assert.equal(after.body.balanced,true);
     assert.equal((await request('/api/v2/invoices')).body.invoices.length,1);
+    assert.deepEqual((await request('/api/bills')).body.map(item=>item.id),['legacy-only-001']);
     const logout=await request('/api/v2/auth/logout',{method:'POST',body:{}});
     assert.equal(logout.status,200);
     assert.equal((await request('/api/v2/accounting/journal')).status,401);
