@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3ec">
+  <meta name="description" content="An independent, static Creative Genome design study for the open-source Free GST Billing software.">
+  <title>CG-W001 / Free GST Billing — Independent hero concept</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --cream: #f5f3ec;
+      --white: #fffdfa;
+      --ink: #1b2b3a;
+      --navy: #192d39;
+      --slate: #657077;
+      --line: #dfdcd2;
+      --ledger: #bd4a46;
+      --stamp: #0d765d;
+      --sans: "Arial", "Helvetica Neue", sans-serif;
+      --serif: "Georgia", "Times New Roman", serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: auto; }
+    body { margin: 0; color: var(--ink); background: var(--cream); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    a:focus-visible { outline: 3px solid var(--ledger); outline-offset: 5px; }
+    .site-shell { max-width: 1800px; margin: 0 auto; overflow: hidden; }
+    .review-strip {
+      height: 34px; background: #e7e4db; border-bottom: 1px solid #dcd6ca;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #5f6060;
+    }
+    .review-strip .review-pip { display:inline-block; width: 6px; height: 6px; background: var(--ledger); border-radius: 50%; }
+    .masthead {
+      height: 89px; padding: 0 clamp(28px, 6.15vw, 96px); background: var(--cream);
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display:flex; align-items:center; gap:13px; text-decoration:none; flex-shrink:0; }
+    .brand-mark {
+      width: 43px; height: 43px; border: 2px solid var(--ink); position: relative;
+      display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding: 8px 10px; gap:5px;
+    }
+    .brand-mark:before { content:""; position:absolute; left: -2px; top:-2px; height: 14px; border-left: 3px solid var(--ledger); }
+    .brand-mark:after { content:""; position:absolute; right:5px; bottom:5px; width:6px; height:6px; border-radius:50%; background:var(--stamp); }
+    .brand-mark i { display:block; background:var(--ink); height:2px; width:17px; }
+    .brand-mark i:nth-child(2) { width:12px; }
+    .brand-name { font-size: 17px; font-weight: 800; letter-spacing:-.06em; line-height:1.0; }
+    .brand-name span { display:block; }
+    .mast-nav { display:flex; align-items:center; gap: 33px; font-size:13px; font-weight:650; letter-spacing:.005em; }
+    .mast-nav .text-link { text-decoration: none; border-bottom:1px solid transparent; padding-bottom:3px; }
+    .mast-nav .text-link:hover { border-bottom-color: var(--ink); }
+    .small-download { display:inline-block; text-decoration:none; border:1px solid var(--ink); padding:14px 18px; line-height:1; transition:background .18s; }
+    .small-download:hover { background:#e7e5df; }
+    .hero { display:grid; grid-template-columns: 51% 49%; min-height:760px; }
+    .hero-copy { position:relative; padding: 91px clamp(24px, 4vw, 64px) 65px clamp(28px, 6.15vw, 96px); background: var(--cream); }
+    .hero-copy::before { content:""; position:absolute; left: clamp(16px,4.3vw,66px); top:0; bottom:0; width:1px; background: #d7d0c6; }
+    .kicker { display:flex; align-items:center; gap:13px; margin-bottom: 38px; text-transform: uppercase; font-size:11px; font-weight:800; letter-spacing:.2em; color:#8c4c47; }
+    .kicker .hairline { background: var(--ledger); width:32px; height:1px; }
+    h1 { font: 400 clamp(58px, 5.25vw, 87px)/1.055 var(--serif); letter-spacing:-.074em; margin:0; max-width: 680px; }
+    h1 span { font-style:italic; display:block; color:var(--ledger); letter-spacing:-.07em; }
+    .dek { max-width: 455px; font-size:17px; line-height:1.7; color:#52636b; margin:31px 0 0; }
+    .action-row { display:flex; flex-wrap:wrap; gap:23px; align-items:center; margin-top:37px; }
+    .primary-cta {
+      display:inline-flex; justify-content:space-between; align-items:center; gap:36px; padding:18px 20px 18px 22px;
+      min-height:58px; text-decoration:none; font-weight:700; font-size:14px; background:var(--ink); color:#fff;
+      border:1px solid var(--ink); transition: background .16s;
+    }
+    .primary-cta:hover { background:#334d5b; }
+    .primary-cta .cta-arrow { font-size:21px; font-weight:400; line-height:1; }
+    .secondary-cta { text-decoration:none; font-size:14px; border-bottom:1px solid var(--ink); padding-bottom:5px; font-weight:650; }
+    .credentials { display:flex; gap:10px; flex-wrap:wrap; margin-top:45px; color:#6b7477; text-transform:uppercase; letter-spacing:.11em; font-size:10px; font-weight:700; }
+    .credentials .point { color:var(--ledger); }
+    .scene { min-width:0; position:relative; overflow:hidden; background: var(--navy); display:flex; align-items:center; justify-content:center; padding:66px 40px 48px; isolation:isolate; }
+    .scene::before {
+      content:""; position:absolute; inset:0; z-index:-2;
+      background:repeating-linear-gradient(0deg,transparent 0, transparent 57px, rgba(246,249,240,.056) 58px),
+                 repeating-linear-gradient(90deg,transparent 0,transparent 57px, rgba(246,249,240,.042) 58px);
+    }
+    .scene::after { content:""; position:absolute; width:560px; height:560px; border:1px solid rgba(238,231,218,.11); border-radius:50%; z-index:-1; right:-315px; top:-265px; }
+    .scene-top { position:absolute; top:32px; left:43px; display:flex; gap:16px; align-items:center; color:#bcc7c8; font-size:10px; letter-spacing:.19em; text-transform:uppercase; font-weight:700; }
+    .scene-top .square { width:10px; height:10px; border:1px solid #9aaba9; transform: rotate(45deg); }
+    .scene-index { position:absolute; right:38px; top:30px; font-size:11px; letter-spacing:.13em; color:#a5b2b6; }
+    .invoice-stage { width:min(100%,482px); position:relative; transform:translate(-11px,-7px); }
+    .invoice-paper {
+      width:100%; background:#fffefa; padding:34px 33px 32px 40px; position:relative;
+      border:1px solid #ede7dc; box-shadow: 0 23px 2px rgba(12,22,29,.06), 0 26px 50px rgba(5,11,17,.33);
+      transform:rotate(-1.6deg);
+    }
+    .invoice-paper::before { content:""; width:1px; background:#d9afa8; position:absolute; top:0; bottom:0; left:29px; }
+    .paper-head { display:flex; justify-content:space-between; align-items:flex-start; gap:15px; padding-bottom:19px; border-bottom:1px solid #d9ddd8; }
+    .tiny-label { color:#879292; font-size:9px; font-weight:800; letter-spacing:.155em; text-transform:uppercase; }
+    .paper-head strong { font: normal 24px/.98 var(--serif); letter-spacing:-.038em; display:block; margin-top:7px; color:#23343f; }
+    .paper-no { font: 700 12px var(--sans); color:#6b797e; white-space:nowrap; }
+    .paper-title-row { margin-top:24px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .paper-title-row h2 { font-size:15px; font-weight:800; line-height:1; letter-spacing:.14em; margin:0; }
+    .document-chip { border:1px solid #dcb3a9; color:#a55047; text-transform:uppercase; letter-spacing:.13em; font-size:9px; font-weight:800; padding:8px; }
+    .bill-grid { display:grid; grid-template-columns:1.25fr .75fr; gap:10px; margin:23px 0 19px; }
+    .bill-grid .entry { color:#344954; font-size:12px; line-height:1.7; margin:7px 0 0; font-weight:700; }
+    .bill-grid .entry-light {font-weight:400; color:#6c7a80; }
+    .invoice-table { width:100%; border-collapse:collapse; margin-top:4px; }
+    .invoice-table th { font-size:9px; text-align:left; color:#738187; text-transform:uppercase; letter-spacing:.13em; padding:12px 0; font-weight:700; border-top:1px solid #dce0dd; border-bottom:1px solid #dce0dd; }
+    .invoice-table th:last-child, .invoice-table td:last-child { text-align:right; }
+    .invoice-table td { padding:20px 0; border-bottom:1px solid #e3e7e4; font-size:13px; font-weight:700; }
+    .invoice-table td small { font-size:10px; display:block; margin-top:3px; font-weight:400; color:#718087; }
+    .invoice-table td:nth-child(2) { color:#6b7a81; font-weight:400; }
+    .summary-table { width:100%; border-collapse:collapse; margin-top:16px; }
+    .summary-table td { padding:5px 0; font-size:11px; color:#718085; }
+    .summary-table td:last-child { text-align:right; color:#344753; font-weight:700; font-variant-numeric: tabular-nums; }
+    .summary-table tr.total-row td { border-top:1px solid #dde1dc; padding-top:13px; font-size:14px; color:#20333e; font-weight:800; }
+    .summary-table tr.total-row td:last-child { font-size:25px; letter-spacing:-.05em; }
+    .invoice-bottom { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-top:22px; padding-top:15px; border-top:1px solid #dce0dd; }
+    .invoice-bottom .sample { font-size:9px; line-height:1.5; color:#8d9998; letter-spacing:.055em; }
+    .invoice-bottom .issued { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.13em; color:#aa5c4f; white-space:nowrap; }
+    .receipt-card {
+      position:absolute; right:-43px; bottom:-78px; width:237px; padding:20px 21px 18px;
+      background:#f4faf5; color:#153d32; border:1px solid #c3d3c7;
+      transform:rotate(3deg); box-shadow:0 16px 30px rgba(9,19,16,.28);
+    }
+    .receipt-card::after {content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:repeating-linear-gradient(90deg,#f4faf5 0,#f4faf5 7px,transparent 7px,transparent 11px); }
+    .receipt-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .receipt-top strong { font-size:10px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+    .check-mark {width:25px;height:25px;border:1.5px solid #0d765d;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:700;}
+    .receipt-amount {font: normal 34px/1 var(--serif);letter-spacing:-.035em;margin:15px 0 8px;}
+    .receipt-note {font-size:11px;color:#5e786d;margin:0;}
+    .scene-bottom {position:absolute;bottom:22px;left:42px;font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:#a2b1b3;}
+    .handoff { background:#fffefa; padding:34px clamp(28px, 6.15vw, 96px) 37px; display:grid; grid-template-columns:1.15fr 1fr; align-items:center; gap:35px; border-top:1px solid #dfd9cc; }
+    .handoff-label { display:block; font-size:10px; font-weight:750; letter-spacing:.16em; color:#b04b47; text-transform:uppercase; margin-bottom:12px; }
+    .handoff h2 {font: normal clamp(22px,2.25vw,33px)/1.25 var(--serif);letter-spacing:-.035em;margin:0;max-width:510px;}
+    .handoff-steps {display:flex;align-items:center;justify-content:flex-end;gap:17px;}
+    .handoff-step {font-size:12px;font-weight:700;white-space:nowrap;}
+    .handoff-step small {display:block;color:#899292;font-size:10px;margin-bottom:7px;letter-spacing:.06em;}
+    .handoff-arrow {font-size:18px;color:#b3b6b4;}
+    .concept-footer {border-top:1px solid #e6e0d6;background:#fffefa;padding:17px clamp(28px,6.15vw,96px);font-size:11px;color:#7f888a;display:flex;justify-content:space-between;gap:18px;line-height:1.5;}
+    @media (min-width: 1500px) {
+      .hero { min-height: 800px; }
+      .hero-copy { padding-top: 124px; }
+      .scene { padding-top: 90px; }
+    }
+    @media (max-width:1160px) {
+      .hero { grid-template-columns:49% 51%; }
+      .hero-copy {padding-right:30px;padding-top:80px;}
+      h1 {font-size:clamp(50px,5.3vw,70px);}
+      .scene { padding:50px 28px; }
+      .invoice-stage {width:min(100%,420px);transform:translate(-6px,-4px);}
+      .invoice-paper {padding:28px 29px 28px 35px;}
+      .receipt-card {right:-23px; width:210px; bottom:-75px;}
+      .credentials {gap:7px;}
+    }
+    @media (max-width: 800px) {
+      .hero { grid-template-columns:1fr; }
+      .hero-copy {padding:68px 7vw 55px 9vw;}
+      .hero-copy::before {left:5vw;}
+      h1 {font-size:clamp(54px,9vw,76px);}
+      .dek {max-width:600px;}
+      .scene {min-height:760px;}
+      .invoice-stage {width:480px; max-width:82%;}
+      .handoff {grid-template-columns:1fr;}
+      .handoff-steps {justify-content:flex-start; flex-wrap:wrap;}
+    }
+    @media (max-width: 540px) {
+      .review-strip {font-size:9px; letter-spacing:.11em; height:31px;}
+      .masthead {height:71px;padding:0 20px;gap:8px;}
+      .brand {gap:9px;}
+      .brand-mark {width:36px;height:36px;padding:6px 8px;}
+      .brand-mark i {width:14px;}
+      .brand-mark i:nth-child(2) {width:10px;}
+      .brand-name {font-size:14px;}
+      .mast-nav {gap:12px;}
+      .mast-nav .text-link {display:none;}
+      .small-download {padding:12px 12px;font-size:11px;}
+      .hero-copy {padding:57px 26px 43px 33px;}
+      .hero-copy::before {left:15px;}
+      .kicker {margin-bottom:27px;font-size:10px;gap:10px;}
+      .kicker .hairline {width:22px;}
+      h1 {font-size:clamp(47px,12.35vw,64px);line-height:1.06;letter-spacing:-.07em;}
+      .dek {font-size:15px;line-height:1.62;margin-top:24px;max-width:360px;}
+      .action-row {margin-top:29px;gap:17px;}
+      .primary-cta {min-height:49px;padding:14px 14px 14px 16px;font-size:12px;gap:18px;}
+      .secondary-cta {font-size:12px;}
+      .credentials {font-size:8px;line-height:1.7;letter-spacing:.095em;margin-top:25px;gap:7px;}
+      .scene {min-height:650px;padding:65px 18px 39px;align-items:center;}
+      .scene-top {top:20px;left:22px;font-size:9px;}
+      .scene-index {top:20px;right:22px;font-size:10px;}
+      .invoice-stage {max-width:none;width:min(100%,340px);transform:translate(-3px,-8px);}
+      .invoice-paper {padding:21px 19px 23px 28px;}
+      .invoice-paper::before {left:19px;}
+      .paper-head {padding-bottom:12px;}
+      .paper-head strong {font-size:18px;}
+      .paper-no {font-size:9px;}
+      .paper-title-row {margin-top:16px;}
+      .paper-title-row h2 {font-size:12px;}
+      .document-chip {font-size:7px;padding:6px;}
+      .tiny-label {font-size:7px;}
+      .bill-grid {margin:13px 0 13px;}
+      .bill-grid .entry {font-size:10px;margin-top:5px;}
+      .invoice-table th {font-size:7px;padding:8px 0;}
+      .invoice-table td {padding:13px 0;font-size:11px;}
+      .invoice-table td small {font-size:8px;}
+      .summary-table {margin-top:10px;}
+      .summary-table td {font-size:9px;padding:4px 0;}
+      .summary-table tr.total-row td {font-size:11px; padding-top:9px;}
+      .summary-table tr.total-row td:last-child {font-size:21px;}
+      .invoice-bottom {margin-top:15px;padding-top:10px;}
+      .invoice-bottom .sample {font-size:7px;max-width:130px;}
+      .invoice-bottom .issued {font-size:8px;}
+      .receipt-card {right:-10px;bottom:-63px;width:174px;padding:12px 14px 14px;}
+      .receipt-top strong {font-size:8px;}
+      .check-mark {width:22px;height:22px;font-size:12px;}
+      .receipt-amount {font-size:26px;margin:9px 0 7px;}
+      .receipt-note {font-size:9px;}
+      .scene-bottom {left:19px;bottom:11px;font-size:7px;}
+      .handoff {padding:29px 25px 31px;gap:25px;}
+      .handoff-label {font-size:9px;}
+      .handoff h2 {font-size:27px;}
+      .handoff-steps {justify-content:space-between;gap:9px;}
+      .handoff-step {font-size:10px;}
+      .handoff-step small {font-size:8px;}
+      .handoff-arrow {font-size:15px;}
+      .concept-footer {padding:15px 25px;flex-wrap:wrap;gap:5px;font-size:9px;}
+    }
+    @media (max-width: 350px) {
+      h1 {font-size:43px;}
+      .action-row {gap:13px;}
+      .hero-copy {padding-right:20px;}
+      .scene {padding-left:12px;padding-right:12px;min-height:655px;}
+      .invoice-stage {width:285px;}
+      .receipt-card {width:152px;right:-3px;bottom:-64px;}
+      .receipt-amount {font-size:22px;}
+      .handoff-step {font-size:9px;}
+    }
+  </style>
+</head>
+<body>
+<div class="site-shell">
+  <div class="review-strip"><span class="review-pip" aria-hidden="true"></span>Independent design study <span aria-hidden="true">/</span> CG-W001</div>
+  <header class="masthead">
+    <a class="brand" href="https://dicecodes.com/free-gst-software-documentation/index.html" aria-label="Free GST Billing official documentation">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+      <span class="brand-name">Free GST<span>Billing</span></span>
+    </a>
+    <nav class="mast-nav" aria-label="Original product resources">
+      <a class="text-link" href="https://dicecodes.com/free-gst-software-documentation/index.html">Documentation</a>
+      <a class="small-download" href="https://github.com/IamRamgarhia/Free-GST-Billing-Software/releases/latest">Get the app ↗</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div class="kicker"><span class="hairline" aria-hidden="true"></span><span>For everyday business</span><span aria-hidden="true">/</span><span>01</span></div>
+        <h1 id="hero-title">Make the invoice.<span>Know what's paid.</span></h1>
+        <p class="dek">Create GST invoices, see what's still due, and record payments. Free, open-source software that runs on your own computer.</p>
+        <div class="action-row">
+          <a class="primary-cta" href="https://github.com/IamRamgarhia/Free-GST-Billing-Software/releases/latest"><span>Download free</span><span class="cta-arrow" aria-hidden="true">↗</span></a>
+          <a class="secondary-cta" href="https://dicecodes.com/free-gst-software-documentation/first-invoice.html">Make your first invoice ↗</a>
+        </div>
+        <div class="credentials" aria-label="Product attributes"><span>Works offline</span><span class="point">·</span><span>No account</span><span class="point">·</span><span>Open source</span></div>
+      </div>
+      <div class="scene" aria-label="Illustration: a sample invoice followed by a recorded payment">
+        <div class="scene-top"><span class="square" aria-hidden="true"></span>From sale to settled</div>
+        <div class="scene-index">FIG. 01 / 02</div>
+        <div class="invoice-stage">
+          <article class="invoice-paper" aria-label="Illustrative invoice sample">
+            <div class="paper-head">
+              <div><span class="tiny-label">Fictional business</span><strong>Northline Studio</strong></div>
+              <span class="paper-no">NS / 0024</span>
+            </div>
+            <div class="paper-title-row">
+              <h2>TAX INVOICE</h2><span class="document-chip">Illustrative invoice</span>
+            </div>
+            <div class="bill-grid">
+              <div><div class="tiny-label">Billed to</div><div class="entry">Sample Customer<br><span class="entry-light">Jaipur, Rajasthan</span></div></div>
+              <div><div class="tiny-label">Invoice date</div><div class="entry">20 Nov 2026<br><span class="entry-light">Sample data</span></div></div>
+            </div>
+            <table class="invoice-table" aria-label="Fictional invoice line items">
+              <thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead>
+              <tbody><tr><td>Studio services<small>Illustrative service fee</small></td><td>01</td><td>₹2,400</td></tr></tbody>
+            </table>
+            <table class="summary-table" aria-label="Fictional invoice totals">
+              <tbody>
+                <tr><td>Subtotal</td><td data-financial="subtotal">₹2,400</td></tr>
+                <tr><td>CGST (9%)</td><td data-financial="cgst">₹216</td></tr>
+                <tr><td>SGST (9%)</td><td data-financial="sgst">₹216</td></tr>
+                <tr class="total-row"><td>Grand total</td><td data-financial="grand-total">₹2,832</td></tr>
+              </tbody>
+            </table>
+            <div class="invoice-bottom"><div class="sample">Fictional details for design review</div><div class="issued">01 / Issued</div></div>
+          </article>
+          <div class="receipt-card" aria-label="Example recorded payment receipt">
+            <div class="receipt-top"><strong>Payment recorded</strong><span class="check-mark" aria-hidden="true">✓</span></div>
+            <div class="receipt-amount">₹2,832</div>
+            <p class="receipt-note">02 / Balance settled</p>
+          </div>
+        </div>
+        <div class="scene-bottom">Editorial illustration · not an app screenshot</div>
+      </div>
+    </section>
+    <section class="handoff" aria-label="Preview of the next content section">
+      <div>
+        <span class="handoff-label">Below the fold / chapter two</span>
+        <h2>The paperwork shouldn't end at “send.”</h2>
+      </div>
+      <div class="handoff-steps" aria-label="Product journey"><span class="handoff-step"><small>01</small>Issue invoice</span><span class="handoff-arrow" aria-hidden="true">→</span><span class="handoff-step"><small>02</small>Track what's due</span><span class="handoff-arrow" aria-hidden="true">→</span><span class="handoff-step"><small>03</small>Record payment</span></div>
+    </section>
+  </main>
+  <footer class="concept-footer"><span>Creative Genome / CG-W001 / Static composition V1</span><span>Independent concept; not affiliated with or endorsed by DiceCodes.</span></footer>
+</div>
+</body>
+</html>
